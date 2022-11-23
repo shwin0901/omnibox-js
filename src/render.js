@@ -8,6 +8,7 @@ class Render {
         this.onInputEntered = new OnInputEnteredListener();
         this.disposition = DISPOSITION_CURRENT_TAB;
         this.inputBox = document.querySelector(inputElement);
+        this.inputBox.classList.add('omn-input');
 
         let suggestFn = this.suggest.bind(this);
         this.inputBox.oninput = async (event) => {
@@ -111,7 +112,11 @@ class Render {
             li.innerHTML = parseOmniboxDescription(description);
             ul.appendChild(li);
         }
-        this.inputBox.insertAdjacentElement('afterend', ul);
+        const { top, left } = getElementOffset(this.inputBox);
+        const inputRectObj = this.inputBox.getBoundingClientRect();
+        ul.style.top = `${top + inputRectObj.height}px`;
+        ul.style.left = `${left}px`;
+        document.body.append(ul);
     }
 }
 
@@ -196,4 +201,16 @@ function parseOmniboxDescription(input) {
     walk(root);
 
     return description;
+}
+
+function getElementOffset(element) {
+    let result = { left: 0, top: 0 }
+    if (window.getComputedStyle(element)["display"] === 'none') {
+        return result
+    }
+    result = element.getBoundingClientRect()
+    return {
+        top: result.top + window.pageYOffset,
+        left: result.left + window.pageXOffset
+    }
 }
